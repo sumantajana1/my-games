@@ -1,1 +1,110 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Racing Game</title>
+<style>
+body {
+  background:#101820;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+canvas {
+  width:min(95vw,400px);
+  background:#333;
+  border:3px solid white;
+}
+button {
+  padding:15px 30px;
+  margin:8px;
+  border:0;
+  border-radius:12px;
+  background:#13b95b;
+  color:white;
+  font-size:20px;
+}
+</style>
+</head>
+<body>
+<h2>🏎️ RACING GAME</h2>
+<h3>Score: <span id="score">0</span></h3>
+<canvas id="game" width="400" height="600"></canvas>
+<div>
+<button onclick="left()">⬅️ LEFT</button>
+<button onclick="right()">RIGHT ➡️</button>
+</div>
+<button onclick="restart()">RESTART</button>
+<script>
+const c=document.getElementById("game");
+const ctx=c.getContext("2d");
+let carX=175, enemy=[], score=0, speed=4;
+let running=true, frame=0;
+
+function drawCar(x,y,color){
+ ctx.fillStyle=color;
+ ctx.fillRect(x,y,50,85);
+ ctx.fillStyle="#bdefff";
+ ctx.fillRect(x+8,y+10,34,20);
+ ctx.fillStyle="#111";
+ ctx.fillRect(x+5,y+65,10,15);
+ ctx.fillRect(x+35,y+65,10,15);
+}
+function left(){
+ if(running)carX=Math.max(65,carX-55);
+}
+function right(){
+ if(running)carX=Math.min(285,carX+55);
+}
+function restart(){
+ carX=175; enemy=[]; score=0;
+ speed=4; frame=0; running=true;
+ document.getElementById("score").textContent=0;
+ requestAnimationFrame(loop);
+}
+function loop(){
+ if(!running)return;
+ ctx.fillStyle="#23833b";
+ ctx.fillRect(0,0,400,600);
+ ctx.fillStyle="#444";
+ ctx.fillRect(50,0,300,600);
+ ctx.fillStyle="white";
+ for(let y=(frame*speed)%100-100;y<600;y+=100){
+  ctx.fillRect(148,y,5,55);
+  ctx.fillRect(248,y,5,55);
+ }
+ if(frame%65===0){
+  enemy.push({x:65+Math.floor(Math.random()*3)*95,y:-100});
+ }
+ enemy.forEach(e=>e.y+=speed);
+ enemy=enemy.filter(e=>e.y<650);
+ drawCar(carX,490,"#00aaff");
+ enemy.forEach(e=>drawCar(e.x, e.y,"#ff3030"));
+ for(let e of enemy){
+  if(carX<e.x+50 && carX+50>e.x &&
+     490<e.y+85 && 575>e.y){
+   running=false;
+   ctx.fillStyle="white";
+   ctx.font="32px Arial";
+   ctx.fillText("GAME OVER",100,300);
+  }
+ }
+ if(!running)return;
+ frame++;
+ if(frame%10===0){
+  score++;
+  document.getElementById("score").textContent=score;
+ }
+ speed=4+Math.min(score/20,8);
+ requestAnimationFrame(loop);
+}
+document.addEventListener("keydown",e=>{
+ if(e.key==="ArrowLeft")left();
+ if(e.key==="ArrowRight")right();
+});
+loop();
+</script>
+</body>
+</html>
+

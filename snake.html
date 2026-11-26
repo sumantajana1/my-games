@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake Game</title>
+<style>
+body {
+  background: #101820;
+  color: white;
+  text-align: center;
+  font-family: Arial;
+}
+canvas {
+  background: #182b22;
+  border: 3px solid lime;
+  width: min(90vw, 360px);
+  height: min(90vw, 360px);
+}
+button {
+  background: #19a34a;
+  color: white;
+  border: none;
+  padding: 15px 23px;
+  margin: 5px;
+  border-radius: 10px;
+  font-size: 20px;
+}
+</style>
+</head>
+<body>
+<h2>🐍 Snake Game</h2>
+<h3>Score: <span id="score">0</span></h3>
+<canvas id="game" width="360" height="360"></canvas>
+<div>
+<button onclick="setDir(0,-1)">⬆️</button><br>
+<button onclick="setDir(-1,0)">⬅️</button>
+<button onclick="setDir(0,1)">⬇️</button>
+<button onclick="setDir(1,0)">➡️</button>
+</div>
+<button onclick="start()">Restart</button>
+<script>
+const c=document.getElementById("game");
+const ctx=c.getContext("2d");
+const size=18;
+let snake, food, dx, dy, score, timer, over;
+
+function start(){
+  clearInterval(timer);
+  snake=[{x:180,y:180},{x:162,y:180},{x:144,y:180}];
+  dx=size; dy=0; score=0; over=false;
+  document.getElementById("score").textContent=0;
+  placeFood();
+  draw();
+  timer=setInterval(move,130);
+}
+
+function placeFood(){
+  food={x:Math.floor(Math.random()*20)*size,
+        y:Math.floor(Math.random()*20)*size};
+}
+
+function setDir(x,y){
+  if(x===-dx && y===-dy)return;
+  dx=x*size; dy=y*size;
+}
+
+function move(){
+  let head={x:snake[0].x+dx,y:snake[0].y+dy};
+  let ate=head.x===food.x && head.y===food.y;
+  if(head.x<0||head.y<0||head.x>=360||head.y>=360||
+    snake.slice(0,ate?snake.length:snake.length-1)
+    .some(p=>p.x===head.x&&p.y===head.y)){
+    clearInterval(timer);
+    over=true;
+    draw();
+    ctx.fillStyle="white";
+    ctx.font="25px Arial";
+    ctx.fillText("GAME OVER",100,180);
+    return;
+  }
+  snake.unshift(head);
+  if(ate){
+    score++;
+    document.getElementById("score").textContent=score;
+    placeFood();
+  }else snake.pop();
+  draw();
+}
+
+function draw(){
+  ctx.fillStyle="#182b22";
+  ctx.fillRect(0,0,360,360);
+  ctx.fillStyle="red";
+  ctx.fillRect(food.x,food.y,size,size);
+  ctx.fillStyle="#39e75f";
+  snake.forEach(p=>ctx.fillRect(p.x,p.y,size-2,size-2));
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowUp")setDir(0,-1);
+  if(e.key==="ArrowDown")setDir(0,1);
+  if(e.key==="ArrowLeft")setDir(-1,0);
+  if(e.key==="ArrowRight")setDir(1,0);
+});
+start();
+</script>
+</body>
+</html>
+
